@@ -1,0 +1,572 @@
+EXP 1
+
+clear; close all; clc;
+
+img1 = imread("pout.tif");
+
+r1 = 80;
+s1 = 20;
+r2 = 180;
+s2 = 255;
+
+l = (s1 - 0) / (r1 - 0);
+m = (s2 - s1) / (r2 - r1);
+n = (255 - s2) / (255 - r2);
+
+[i, j] = size(img1);
+for i = 1:1:i
+ for j = 1:1:j
+ 
+ if (img1(i, j) < r1)
+ contimg(i, j) = l * img1(i, j);
+ elseif (img1(i, j) >= r1 && img1(i, j) <= r2)
+ contimg(i, j) = m * (img1(i, j) - r1) + s1;
+ else
+ contimg(i, j) = n * (img1(i, j) - r2) + s2;
+ end
+ end
+end
+
+subplot(1, 2, 1);
+imshow(img1);
+title('Original Image')
+subplot(1, 2, 2);
+imshow(contimg);
+title('Cont. Stretching')
+
+figure;
+subplot(1, 2, 1);
+imhist(img1);
+title('Histogram for Original Image');
+subplot(1, 2, 2);
+imhist(contimg);
+title('Histogram for Contrast Stretched Image');
+
+
+EXP 2
+
+clear; close all; clc;
+
+img=imread('peppers.png');
+r=img(:,:,1);
+g=img(:,:,2);
+b=img(:,:,3);
+gray=(r+g+b)/3;
+
+thresh=60;
+bin = gray;
+[m, n]=size(gray);
+for i = 1:m
+    for j = 1:n
+        if (gray(i,j) >= thresh)
+            bin(i,j)=255;
+        else
+            bin(i,j)=0;
+        end
+    end
+end
+
+bright=imadd(gray,50);
+dark=imsubtract(gray,50);
+
+subplot(2,3,1)
+imshow(img);
+title('Original')
+
+subplot(2,3,2)
+imshow(gray);
+title('Grayscale')
+
+subplot(2,3,3)
+imshow(bin);
+title('Binary')
+
+subplot(2,3,4)
+imshow(bright);
+title('Brighter')
+
+subplot(2,3,6)
+imshow(dark);
+title('Dark')
+
+EXP 3
+
+
+clear; close all; clc;
+
+img = imread("moon.tif");
+
+lt = 10;
+ut = 70;
+
+[m,n]=size(img);
+for i=1:m
+    for j=1:n
+        if(img(i,j)>=lt && img(i,j)<=ut)
+            ib(i,j)=255;
+            iwb(i,j)=255;
+        else
+            ib(i,j)=img(i,j);
+            iwb(i,j)=0;
+        end
+    end
+end
+
+subplot(1,3,1)
+imshow(img);
+title('Original Image')
+
+subplot(1,3,2)
+imshow(ib);
+title('With Background')
+
+subplot(1,3,3)
+imshow(iwb);
+title('Without Background')
+
+
+EXP 4 
+
+clear; close all; clc;
+
+colour = imread('peppers.png');
+img = rgb2gray(colour);
+
+m = 0; % mean
+v = 0.05; % variance
+
+gauss_img = imnoise(img, 'gaussian', m, v);
+sp_img = imnoise(img, 'salt & pepper', 0.01);
+
+mask_size = 5;  
+sigma = 1.5; 
+[x, y] = meshgrid(-floor(mask_size/2):floor(mask_size/2), -floor(mask_size/2):floor(mask_size/2));
+gaussian_mask = exp(-(x.^2 + y.^2) / (2 * sigma^2)); 
+gaussian_mask = gaussian_mask / sum(gaussian_mask(:)); 
+
+filtered_gaussian_image = conv2(double(gauss_img), gaussian_mask, 'same');
+
+filtered_sp_image = medfilt2(sp_img, [mask_size mask_size]); 
+
+subplot(2,3,1)
+imshow(colour)
+title('Original Image')
+
+subplot(2,3,2)
+imshow(img)
+title('Grayscale')
+
+subplot(2,3,3)
+imshow(gauss_img)
+title('Gaussian Noise Image')
+
+subplot(2,3,4)
+imshow(filtered_gaussian_image, [])
+title('Filtered Gaussian Image')
+
+subplot(2,3,5)
+imshow(sp_img)
+title('Salt and Pepper Noise Image')
+
+subplot(2,3,6)
+imshow(filtered_sp_image)
+title('Filtered Salt and Pepper Noise Image')
+
+figure;
+disp('Gaussian Filter Mask Values:'); 
+disp(gaussian_mask);
+
+
+EXP 5 
+
+% Load the RGB image
+rgbImage = imread('peppers.png');
+
+% Convert RGB to HSV
+hsvImage = rgb2hsv(rgbImage);
+
+% Convert HSV to RGB
+rgbImage2 = hsv2rgb(hsvImage);
+
+% Display the original and converted images
+subplot(1,3,1), imshow(rgbImage), title('Original RGB Image');
+subplot(1,3,2), imshow(hsvImage), title('HSV Image');
+subplot(1,3,3), imshow(rgbImage2), title('RGB Image from HSV');
+
+EXP 6
+
+
+%%Ideal Filtering
+% clear; close all; clc;
+
+% 
+% img = imread("cameraman.tif");
+% 
+% ftimg = fft2(img);
+% 
+% sftimg = fftshift(ftimg);
+% 
+% [row, col] = size(img);
+% 
+% lpm = zeros(row, col);
+% hpm = zeros(row, col);
+% 
+% d0 = 10;
+% 
+% 
+% for i = 1:1:row
+%  for j = 1:1:col
+% 
+%  d = sqrt((i - row/2)^2 + (j - col/2)^2);
+% 
+%  if d <= d0
+%  lpm(i,j) = 1;
+%  hpm(i,j) = 0;
+%  else
+%  lmp(i,j) = 0;
+%  hpm(i,j) = 1;
+%  end
+%  end
+% end
+% 
+% lfof = lpm .* sftimg;
+% 
+% hfof = hpm .* sftimg;
+% 
+% lfos = ifft2(lfof);
+% hfos = ifft2(hfof);
+% 
+% subplot(3,3,1); imshow(img); title('Original Image');
+% 
+% subplot(3,3,2); imshow(uint8(abs(ftimg))); title('Fourier Transform');
+% 
+% subplot(3,3,3); imshow(uint8(abs(sftimg))); title('Shifted Fourier Transform');
+% 
+% subplot(3,3,4); imshow(lpm); title('Low-pass Filter');
+% 
+% subplot(3,3,5); imshow(uint8(abs(lfof))); title('LPF Img FreqDomain');
+% 
+% subplot(3,3,6); imshow(uint8(abs(lfos))); title('LPF Img SpatialDomain');
+% 
+% subplot(3,3,7); imshow(hpm); title('High-pass Filter');
+% 
+% subplot(3,3,8); imshow(uint8(abs(hfof))); title('HPF Img FreqDomain');
+% 
+% subplot(3,3,9); imshow(uint8(abs(hfos))); title('HPF Img SpatialDomain');
+
+%%Butterworth Filter and Guassian Filter
+
+
+clear; close all; clc;
+figure;
+
+img = imread("cameraman.tif");
+
+ftimg = fft2(img);
+
+sftimg = fftshift(ftimg);
+
+[row, col] = size(img);
+
+lpm = zeros(row, col);
+hpm = zeros(row, col);
+
+d0 = 10;
+n = 5; 
+
+for i = 1:1:row
+ for j = 1:1:col
+ 
+ d = sqrt((i - row/2)^2 + (j - col/2)^2);
+ 
+ lpm(i,j) = 1 / (1 + (d/d0)^(2*n));
+ 
+ hpm(i,j) = 1 - lpm(i,j);
+ end
+end
+
+lfof = lpm .* sftimg;
+
+hfof = hpm .* sftimg;
+
+lfos = ifft2(lfof);
+hfos = ifft2(hfof);
+
+subplot(3,3,1); imshow(img); title('Og Image');
+
+subplot(3,3,2); imshow(uint8(abs(ftimg))); title('Fourier Transform');
+
+subplot(3,3,3); imshow(uint8(abs(sftimg))); title('Shifted Fourier Transform');
+
+subplot(3,3,4); imshow(lpm); title('Butterworth LPF');
+
+subplot(3,3,5); imshow(uint8(abs(lfof))); title('LPF Img FreqDomain');
+
+subplot(3,3,6); imshow(uint8(abs(lfos))); title('LPF Img SpatialDomain');
+
+subplot(3,3,7); imshow(hpm); title('Butterworth HPF');
+
+subplot(3,3,8); imshow(uint8(abs(hfof))); title('HPF Img FreqDomain');
+
+subplot(3,3,9); imshow(uint8(abs(hfos))); title('HPF Img SpatialDomain');
+figure;
+
+ftimg1 = fft2(img);
+
+sftimg1 = fftshift(ftimg1);
+
+[row, col] = size(img);
+
+lpm1 = zeros(row, col);
+hpm1 = zeros(row, col);
+
+d01 = 10;
+n1 = 5; 
+
+for i1 = 1:1:row
+ for j1 = 1:1:col
+ 
+ d1 = sqrt((i1 - row/2)^2 + (j1 - col/2)^2);
+ 
+ lpm1(i1,j1) = exp(-d1^(2)/2d01^(2));
+
+ 
+ hpm1(i1,j1) = 1 - lpm(i1,j1);
+ end
+end
+
+lfof1 = lpm1 .* sftimg1;
+
+hfof1 = hpm1 .* sftimg1;
+
+lfos1 = ifft2(lfof1);
+hfos1 = ifft2(hfof1);
+
+subplot(3,3,1); imshow(img); title('Og Image');
+
+subplot(3,3,2); imshow(uint8(abs(ftimg1))); title('Fourier Transform');
+
+subplot(3,3,3); imshow(uint8(abs(sftimg1))); title('Shifted Fourier Transform');
+
+subplot(3,3,4); imshow(lpm1); title('Guassian LPF');
+
+subplot(3,3,5); imshow(uint8(abs(lfof1))); title('LPF Img FreqDomain');
+
+subplot(3,3,6); imshow(uint8(abs(lfos1))); title('LPF Img SpatialDomain');
+
+subplot(3,3,7); imshow(hpm1); title('Guassian HPF');
+
+subplot(3,3,8); imshow(uint8(abs(hfof1))); title('HPF Img FreqDomain');
+
+subplot(3,3,9); imshow(uint8(abs(hfos1))); title('HPF Img SpatialDomain');
+
+
+
+EXP 7
+
+
+clear; close all; clc;
+% Read the original image
+I = imread('practical.jpg');
+img=rgb2gray(I);
+img1=imbinarize(img);
+img2=imcomplement(img1);
+
+se=strel('square',5);
+
+open=imopen(img2,se);
+close=imclose(img1,se);
+
+subplot(1,2,1)
+imshow(img1)
+title('Bright Background')
+
+subplot(1,2,2)
+imshow(img2)
+title('Dark Background')
+
+figure;
+
+subplot(1,2,1)
+imshow(close)
+title('Smaller Object is Removed')
+
+subplot(1,2,2)
+imshow(open)
+title('Smaller Object is Removed')
+
+
+EXP 8
+
+clear; close all; clc; 
+
+img= imread('hand.jpeg');
+img1= rgb2gray(img);
+img2= imbinarize(img1, graythresh(img));
+
+se1= strel('disk',10);
+img3= imopen(img2,se1);
+
+b=bwlabel(img3);
+b(b ~= 3)=0;
+
+se2= strel('disk',10);
+img4= imopen(b,se2);
+img5= img4 .* double(img1);
+
+subplot(1,4,1)
+imshow(img)
+title('Original Image')
+
+subplot(1,4,2)
+imshow(img1)
+title('Grayscale Image')
+
+subplot(1,4,4)
+imshow(img5, []);
+title('Segmented Part')
+
+subplot(1,4,3)
+imshow(img3)
+title('Opened Image')
+
+figure;
+
+imshow(img4)
+
+
+EXP 9
+
+
+
+
+clear; close all; clc;
+
+img= imread('shivamterde1.png');
+img1= rgb2gray(img);
+img2= imbinarize(img1);
+
+se1= strel('disk',5);
+
+e1= imerode(img2, se1);
+d1= imdilate(img2, se1);
+
+outer= d1-img2;
+inner= img2-e1;
+overall= d1-e1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+coin= imread('coins.png');
+coinb= imbinarize(coin);
+result= bwfill(coinb,'holes');
+
+subplot(2,3,1)
+imshow(outer)
+title('Outer Boundary')
+
+subplot(2,3,2)
+imshow(inner)
+title('Inner Boundary')
+
+subplot(2,3,3)
+imshow(outer)
+title('Overall Boundary')
+
+subplot(2,3,5)
+imshow(img2)
+title('Original Image')
+
+figure;
+
+subplot(1,3,1)
+imshow(coin)
+title('Original Image')
+
+subplot(1,3,2)
+imshow(coinb)
+title('Binary Image')
+
+subplot(1,3,3)
+imshow(result)
+title('Result')
+
+
+EXP 10 
+
+
+
+clear; close all; clc; 
+
+img= imread('hand.jpeg');
+img1= rgb2gray(img);
+img2= imbinarize(img1, graythresh(img));
+
+se1= strel('disk',10);
+img3= imopen(img2,se1);
+
+b=bwlabel(img3);
+b(b ~= 3)=0;
+
+se2= strel('disk',10);
+img4= imopen(b,se2);
+img5= img4 .* double(img1);
+
+subplot(1,4,1)
+imshow(img)
+title('Original Image')
+
+subplot(1,4,2)
+imshow(img1)
+title('Grayscale Image')
+
+subplot(1,4,4)
+imshow(img5, []);
+title('Segmented Part')
+
+subplot(1,4,3)
+imshow(img3)
+title('Opened Image')
+
+figure;
+
+imshow(img4)
+
+
+EXP11 
+
+
+% Read the image
+clear; close all; clc;
+
+image = imread('peppers.png');
+
+% Convert the image to grayscale if it's a color image
+if size(image, 3) == 3
+    grayImage = rgb2gray(image);
+else
+    grayImage = image;
+end
+
+% Compute GLCM
+glcm = graycomatrix(grayImage, 'Offset', [0 1; -1 1; -1 0; -1 -1], 'NumLevels', 256, 'GrayLimits', [], 'Symmetric', true);
+
+% Compute GLCM properties
+properties = graycoprops(glcm, {'Contrast', 'Correlation', 'Energy', 'Homogeneity'});
+
+% Display the results
+disp('GLCM Contrast:');
+disp(properties.Contrast);
+disp('GLCM Correlation:');
+disp(properties.Correlation);
+disp('GLCM Energy:');
+disp(properties.Energy);
+disp('GLCM Homogeneity:');
+disp(properties.Homogeneity);
+
+
+
+
+
+
+
